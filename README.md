@@ -28,13 +28,14 @@ After that, use your agent's normal skill discovery flow to browse or activate t
 
 This root README only explains the repository itself.
 
+- Skills now live under `skills/<skill-name>/`.
 - Each skill should document its own purpose and usage in its own directory.
 - The source of truth for a skill is the files stored in this repo.
 - Skill-specific instructions live with the skill, not in this root README.
 
 ## Documentation Structure
 
-Each skill directory should use this structure:
+Each `skills/<skill-name>/` directory should use this structure:
 
 - SKILL.md: primary guidance, decision flow, and examples.
 - references/: optional deep dives for complex workflows.
