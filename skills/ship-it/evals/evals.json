@@ -1,0 +1,56 @@
+{
+  "skill_name": "ship-it",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Ship it. I just finished adding webhook retry logic to my Go CLI tool. The repo has Release Please, GoReleaser, and install scripts. There's an open issue #14 about webhook reliability.",
+      "expected_output": "Full pipeline execution: tests with coverage, code review, PII scan, conventional commit review, push, PR creation with 'Closes #14', release monitoring, artifact install via install script, validation, issue #14 closure with notes.",
+      "files": [],
+      "assertions": [
+        {"text": "Gathers git state, project type, release pipeline, and issue context before asking any questions"},
+        {"text": "Asks all clarification questions in a single batch"},
+        {"text": "Runs tests with coverage"},
+        {"text": "Invokes code-review skill"},
+        {"text": "Invokes PII scanner skill"},
+        {"text": "Reviews commit messages for conventional format"},
+        {"text": "Creates PR with 'Closes #14' in body"},
+        {"text": "Monitors Release Please pipeline for release"},
+        {"text": "Installs artifact via install script"},
+        {"text": "Validates installed version works"},
+        {"text": "Closes issue #14 with summary comment"},
+        {"text": "Shows completion summary checklist"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Ok we're done, let's finalize. This is a React component library — I added the date picker component. No release automation set up, just npm publish manually. Tests are in Jest.",
+      "expected_output": "Graceful degradation: tests with coverage via Jest, code review, PII scan, conventional commit review, push, PR creation. Skips release monitoring, artifact install, and issue closure.",
+      "files": [],
+      "assertions": [
+        {"text": "Detects absence of release pipeline"},
+        {"text": "Runs tests via Jest with coverage"},
+        {"text": "Skips release monitoring and artifact install phases"},
+        {"text": "Skips issue closure"},
+        {"text": "Still performs code review and PII scan"},
+        {"text": "Gathers context before asking questions"},
+        {"text": "Creates PR for the branch"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Let's wrap this up and ship. Fixed the CSV parser bug from issue #7. I've got like 5 WIP commits that need cleaning up. The project uses pytest and has a GitHub Actions CI but no automated releases.",
+      "expected_output": "Tests with coverage via pytest, code review, PII scan, commit cleanup with user consent, push, PR with 'Closes #7'. Skips release/install phases. Closes issue #7.",
+      "files": [],
+      "assertions": [
+        {"text": "Identifies the 5 WIP commits as needing cleanup"},
+        {"text": "Asks user for consent before rewriting commit history"},
+        {"text": "Proposes lightest-touch cleanup"},
+        {"text": "Runs tests via pytest with coverage"},
+        {"text": "Closes issue #7 with fix summary"},
+        {"text": "Skips release monitoring and artifact install"},
+        {"text": "Still performs code review and PII scan"},
+        {"text": "Creates PR with 'Closes #7' in body"}
+      ]
+    }
+  ]
+}

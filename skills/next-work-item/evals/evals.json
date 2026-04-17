@@ -1,0 +1,75 @@
+{
+  "skill_name": "next-work-item",
+  "evals": [
+    {
+      "id": 1,
+      "name": "github-source-of-truth-detected",
+      "prompt": "Let's work on the next thing.",
+      "expected_output": "The skill detects the git repo, finds an explicit source-of-truth statement pointing to GitHub issues, recommends GitHub as the source, confirms that choice with the user, and then returns one actionable next item with rationale and planning handoff.",
+      "files": [],
+      "expectations": [
+        "Checks whether the current directory is a git repo",
+        "Inspects repo docs for explicit planning-source statements before triaging",
+        "Recommends GitHub issues when repo docs explicitly declare them as the source of truth",
+        "Uses gh issue list before narrowing to a specific issue",
+        "Returns one recommended next item rather than a broad backlog dump",
+        "Ends with a direct transition into planning"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "next-fix-prefers-actionable-bug",
+      "prompt": "Let's work on the next fix.",
+      "expected_output": "The skill triages the selected source with a bug-first lens, excludes blocked work, and recommends one actionable bug instead of a feature or research item.",
+      "files": [],
+      "expectations": [
+        "Maps the prompt intent to fix or bug work",
+        "Prefers bug-labeled or clearly bug-shaped items over features",
+        "Excludes blocked items by default",
+        "Explains why non-bug candidates were not chosen",
+        "Includes blockers or dependency notes in the final recommendation"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "docs-backlog-priority-markers",
+      "prompt": "What should we work on next? Use the roadmap doc, not the issue tracker.",
+      "expected_output": "The skill honors the user's source choice, scans only credible planning docs, prefers explicit next or priority markers over simple file order, and returns one defensible recommendation.",
+      "files": [],
+      "expectations": [
+        "Honors the user's explicit source override",
+        "Scans roadmap, backlog, or TODO documents rather than every markdown file in the repo",
+        "Prefers explicit next or priority markers over raw document order",
+        "Ignores completed or archived items",
+        "Returns one recommended work item with reasoning"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "gitlab-without-glab-falls-back-cleanly",
+      "prompt": "Pick the next feature from this GitLab repo.",
+      "expected_output": "The skill detects that the repo is on GitLab, checks for glab, reports the limitation if glab is unavailable, and offers another credible source instead of pretending GitLab issue triage works.",
+      "files": [],
+      "expectations": [
+        "Inspects git remotes to identify GitLab",
+        "Checks whether glab is installed before attempting GitLab issue triage",
+        "Does not claim to support GitLab issues when glab is unavailable",
+        "Offers docs or another user-specified source as fallback",
+        "Keeps the conversation focused on choosing the next item rather than implementation"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "user-requests-another-source",
+      "prompt": "Let's work on the next thing, but don't use GitHub issues. Use my Jira board.",
+      "expected_output": "The skill respects the user's source preference, does not force GitHub or docs, and asks for the specific Jira artifact or access path needed to inspect that source.",
+      "files": [],
+      "expectations": [
+        "Honors the user's explicit source preference",
+        "Does not override the user back to GitHub issues",
+        "Asks for the specific artifact, path, or access method needed for the requested source",
+        "Does not fabricate Jira data it cannot inspect"
+      ]
+    }
+  ]
+}

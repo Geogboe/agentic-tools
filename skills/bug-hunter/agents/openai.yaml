@@ -1,0 +1,7 @@
+interface:
+  display_name: "Bug Hunter"
+  short_description: "Stress test tools like a real user"
+  default_prompt: "Use $bug-hunter to find and capture bugs in this project."
+
+policy:
+  allow_implicit_invocation: true
