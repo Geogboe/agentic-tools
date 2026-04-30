@@ -3,11 +3,11 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Set up nginx on my Ubuntu 22.04 VPS at 192.168.1.100, deploy a static site from a local ./site/ directory, and make sure nginx starts on boot. I SSH in as 'deploy' with sudo.",
+      "prompt": "Set up nginx on my Ubuntu 22.04 VPS at 203.0.113.100, deploy a static site from a local ./site/ directory, and make sure nginx starts on boot. I SSH in as 'deploy' with sudo.",
       "expected_output": "A complete pyinfra project scaffold (inventory.py, deploy.py, group_data/all.py) that installs nginx, uploads the site files from ./site/ to a web root, and ensures nginx is enabled and running. Must use apt.packages, files.rsync or files.put, files.directory, and systemd.service operations. Should use _sudo=True and set the correct ssh_user.",
       "files": [],
       "expectations": [
-        "Output includes an inventory.py file with the VPS IP 192.168.1.100",
+        "Output includes an inventory.py file with the VPS IP 203.0.113.100",
         "Output includes apt.packages to install nginx",
         "Output uses files.put, files.rsync, or files.directory to handle the ./site/ directory",
         "Output includes systemd.service with running=True and enabled=True for nginx",

@@ -241,13 +241,13 @@ separate deploy file.
 
 ```python
 # inventory.py
-web = ["192.168.1.10", "192.168.1.11", "web.example.com"]
+web = ["192.0.2.10", "192.0.2.11", "web.example.com"]
 db = ["db.example.com"]
 
 # With per-host SSH options
 web = [
-    ("192.168.1.10", {"ssh_user": "ubuntu", "ssh_key": "~/.ssh/id_rsa"}),
-    ("192.168.1.11", {"ssh_user": "deploy"}),
+    ("192.0.2.10", {"ssh_user": "ubuntu", "ssh_key": "~/.ssh/id_rsa"}),
+    ("192.0.2.11", {"ssh_user": "deploy"}),
 ]
 ```
 
@@ -257,10 +257,10 @@ Run: `pyinfra inventory.py deploy.py`
 
 ```python
 # Single host
-pyinfra 192.168.1.10 deploy.py
+pyinfra 192.0.2.10 deploy.py
 
 # Multiple hosts (comma-separated)
-pyinfra 192.168.1.10,192.168.1.11 deploy.py
+pyinfra 192.0.2.10,192.0.2.11 deploy.py
 
 # Docker container
 pyinfra @docker/ubuntu:22.04 deploy.py
@@ -269,7 +269,7 @@ pyinfra @docker/ubuntu:22.04 deploy.py
 pyinfra @local deploy.py
 
 # Windows via WinRM
-pyinfra @winrm/192.168.1.50 deploy.py
+pyinfra @winrm/198.51.100.50 deploy.py
 ```
 
 ### Dynamic inventory with Python
@@ -424,5 +424,5 @@ pyinfra inventory.py deploy.py --serial
 
 # Facts only — list facts for hosts without deploying
 pyinfra inventory.py fact server.Hostname
-pyinfra 192.168.1.10 fact server.LinuxDistribution
+pyinfra 192.0.2.10 fact server.LinuxDistribution
 ```

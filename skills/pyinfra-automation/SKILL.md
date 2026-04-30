@@ -214,7 +214,7 @@ instructions, connector syntax, available operations, and caveats.
 
 **Quick summary:**
 - Install: `uv tool install pyinfra --with https://github.com/pyinfra-dev/pyinfra-windows.git`
-- Target: `pyinfra @winrm/192.168.1.50 deploy.py`
+- Target: `pyinfra @winrm/198.51.100.50 deploy.py`
 - Use `pyinfra_windows.operations` and `pyinfra_windows.facts` namespaces
 
 ---

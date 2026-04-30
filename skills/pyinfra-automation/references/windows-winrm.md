@@ -51,15 +51,15 @@ Use the `@winrm/<address>` connector syntax:
 
 ```bash
 # Ad-hoc single host
-pyinfra @winrm/192.168.1.50 deploy.py
+pyinfra @winrm/198.51.100.50 deploy.py
 
 # With explicit credentials
-pyinfra "@winrm/192.168.1.50" deploy.py \
+pyinfra "@winrm/198.51.100.50" deploy.py \
   --winrm-username Administrator \
   --winrm-password 'MyP@ssword'
 
 # Multiple hosts
-pyinfra "@winrm/192.168.1.50,@winrm/192.168.1.51" deploy.py
+pyinfra "@winrm/198.51.100.50,@winrm/198.51.100.51" deploy.py
 ```
 
 In an inventory file:
@@ -67,7 +67,7 @@ In an inventory file:
 ```python
 # inventory.py
 windows_hosts = [
-    ("@winrm/192.168.1.50", {
+    ("@winrm/198.51.100.50", {
         "winrm_username": "Administrator",
         "winrm_password": "MyP@ssword",
         "winrm_port": 5985,          # 5985 = HTTP (default), 5986 = HTTPS
@@ -208,9 +208,9 @@ conditional imports:
 
 ```python
 # inventory.py
-linux_web = ["192.168.1.10", "192.168.1.11"]
+linux_web = ["192.0.2.10", "192.0.2.11"]
 windows_app = [
-    ("@winrm/192.168.1.50", {"winrm_username": "Administrator", "winrm_password": "pass"}),
+    ("@winrm/198.51.100.50", {"winrm_username": "Administrator", "winrm_password": "pass"}),
 ]
 ```
 
@@ -283,7 +283,7 @@ win_ops.powershell.script(
 
 ```bash
 # Run against a Windows Server 2022 host
-pyinfra "@winrm/192.168.1.50" deploy.py \
+pyinfra "@winrm/198.51.100.50" deploy.py \
   --winrm-username Administrator \
   --winrm-password "MyP@ssword" \
   --winrm-transport ntlm
@@ -307,7 +307,7 @@ pyinfra "@winrm/192.168.1.50" deploy.py \
 ```bash
 # Test WinRM connection with curl
 curl -v --ntlm --user "Administrator:password" \
-  "http://192.168.1.50:5985/wsman"
+    "http://198.51.100.50:5985/wsman"
 ```
 
 If you get a 200 response, WinRM is reachable and auth is working.
