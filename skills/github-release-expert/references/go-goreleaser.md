@@ -153,6 +153,102 @@ jobs:
 - `ref: ${{ needs.release-please.outputs.tag_name }}` — goreleaser validates that the tag points to HEAD; without this it fails with `"git tag vX.Y.Z was not made against commit <sha>"`
 - `anchore/sbom-action/download-syft@v0` — goreleaser-action v6 does NOT auto-install syft even when `.goreleaser.yml` requests SBOMs; the step must be explicit
 
+## Keyless Cosign Signing (Sigstore)
+
+Optional, but recommended over a long-lived GPG/PGP key: sign `checksums.txt` with
+**keyless cosign** (Sigstore's Fulcio + Rekor), using the release job's own GitHub
+Actions OIDC token as the signing identity. No private key is ever generated,
+stored, or rotated — the cert is short-lived and tied to the specific workflow run.
+
+`.goreleaser.yml` addition:
+
+```yaml
+signs:
+  - cmd: cosign
+    signature: "${artifact}.sigstore.json"
+    args:
+      - "sign-blob"
+      - "--bundle=${signature}"
+      - "${artifact}"
+      - "--yes"
+    artifacts: checksum
+```
+
+Workflow additions to the `goreleaser` job — install cosign, and grant the job
+`id-token: write` (required for GitHub to issue the OIDC token cosign exchanges
+with Fulcio):
+
+```yaml
+  goreleaser:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write   # required: lets this job request an OIDC token for keyless signing
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.release-please.outputs.tag_name }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: anchore/sbom-action/download-syft@v0
+      - uses: sigstore/cosign-installer@v3   # goreleaser-action does NOT auto-install cosign, same as syft
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Consumers verify with:
+
+```bash
+cosign verify-blob checksums.txt --bundle checksums.txt.sigstore.json \
+  --certificate-identity-regexp '^https://github.com/OWNER/REPO/\.github/workflows/release.*\.yml@refs/heads/main$' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+### Optional: gate the goreleaser job behind a required-reviewer Environment
+
+For an extra manual checkpoint before artifacts publish, run the `goreleaser` job
+under a GitHub Environment with a required reviewer:
+
+```yaml
+  goreleaser:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    environment: release-signing   # pauses for manual approval before this job starts
+    runs-on: ubuntu-latest
+    ...
+```
+
+**The Environment must exist before the first run that references it**, or the job
+queues forever waiting on an approval gate nothing can satisfy. Create it via:
+
+```bash
+gh api -X PUT repos/OWNER/REPO/environments/release-signing \
+  -f 'reviewers[][type]=User' -F 'reviewers[][id]=<numeric-github-user-id>'
+```
+(get the numeric id with `gh api user --jq .id`, or add a team as `type=Team`
+with the team's id instead). Do this as part of initial setup, not as an
+afterthought discovered when a release hangs.
+
+If `release-please` and `goreleaser` share a `concurrency:` group (see workflow
+serialization above), scope the group to the `release-please` job specifically,
+**not** the whole workflow file — otherwise a `goreleaser` job paused on approval
+blocks the *next* push's `release-please` job too, stalling all release activity
+for as long as the approval is outstanding:
+
+```yaml
+  release-please:
+    concurrency:
+      group: release-please-${{ github.ref }}
+      cancel-in-progress: false
+```
+
 ## Baseline `.goreleaser.yml`
 
 ```yaml
@@ -296,3 +392,37 @@ ci:
 
 8. **govulncheck fails on standard library CVEs.**
    - Pin workflows to a patched Go patch version.
+
+9. **`cosign: executable file not found` when testing `.goreleaser.yml` locally
+   (`goreleaser release --snapshot` or similar).**
+   - Expected, not a bug. Keyless signing needs a real GitHub Actions OIDC
+     token exchanged with Fulcio — there's no local equivalent, and installing
+     a local `cosign` binary wouldn't help since there's still no valid OIDC
+     identity to sign with outside an Actions run. Validate the `signs:` config
+     shape locally (`goreleaser check`), but expect the actual signing step to
+     only succeed in CI.
+
+10. **`goreleaser` job hangs indefinitely after a release-please PR merges.**
+    - If the job is gated behind a required-reviewer Environment (see Cosign
+      section above), this means the Environment doesn't exist yet in repo
+      Settings. Create it before the next release, or the job queues forever
+      waiting on an approval gate nothing can satisfy.
+
+11. **Release workflow run stuck `queued` for many minutes with zero jobs
+    dispatched, across multiple runs/repos, or alongside other unrelated
+    Actions activity (e.g. Copilot review) also stalled.**
+    - Don't assume it's this repo's config. Check
+      https://www.githubstatus.com for an active GitHub Actions incident
+      before debugging further — a platform-wide outage produces exactly this
+      symptom (run created, never dispatched, no logs, no error). If there's a
+      live incident and the release can't wait: build locally with
+      `goreleaser release --clean --skip=sign,publish,validate,announce`
+      (requires a real annotated tag checked out first — mirror whatever
+      version-bump commit release-please would have made, e.g. manually
+      bumping `.release-please-manifest.json`), then publish the resulting
+      `dist/` artifacts with `gh release create <tag> dist/* --notes '...'`.
+      Mark the release notes explicitly as an unsigned interim build blocked
+      on the outage — no `checksums.txt.sigstore.json` will exist for it —
+      and expect it to be superseded by a normal signed release once Actions
+      recovers (the manifest is already bumped, so release-please won't
+      recreate this version; it'll pick up from here for the next commit).

@@ -1,6 +1,6 @@
 ---
 name: github-release-expert
-description: Set up or migrate a GitHub release pipeline that uses Release Please for automated release PRs, versioning, tags, and GitHub Releases, plus optional GoReleaser artifact publishing. Use when asked to automate releases on merge, replace manual tag-based releases, fix Release Please permission failures, fix missing release assets, validate end-to-end release behavior in GitHub, or set up CI with golangci-lint, gitleaks, govulncheck, or yamllint.
+description: Set up or migrate a GitHub release pipeline that uses Release Please for automated release PRs, versioning, tags, and GitHub Releases, plus optional GoReleaser artifact publishing. Use when asked to automate releases on merge, replace manual tag-based releases, fix Release Please permission failures, fix missing release assets, add or debug keyless cosign/Sigstore signing, recover from a release pipeline stuck on a GitHub Actions outage, validate end-to-end release behavior in GitHub, or set up CI with golangci-lint, gitleaks, govulncheck, or yamllint.
 ---
 
 # Setup Release Please Pipeline
@@ -136,3 +136,8 @@ For Go repos with GoReleaser, read `references/go-goreleaser.md` — it covers:
 - gitleaks CLI (avoids paid license requirement of gitleaks-action)
 - syft installation for SBOM generation
 - goreleaser config with SBOM, checksums, cross-compilation
+- keyless cosign/Sigstore signing (no long-lived key), optionally gated behind
+  a required-reviewer Environment
+- recovering a release when the goreleaser job is stuck queued because of a
+  GitHub Actions platform outage (check githubstatus.com; manual unsigned
+  interim build as a fallback)
